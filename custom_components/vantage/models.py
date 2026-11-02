@@ -17,6 +17,7 @@ class VantageDevice:
     vid: str
     object_type: str
     type: VantageDeviceType
+    area: str | None = None
     load_type: str | None = None
     brightness: int = 100
     power: bool = False

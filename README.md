@@ -1,45 +1,65 @@
-# Home Assistant Vantage
+# Vantage InFusion for Home Assistant
 
-Custom Home Assistant integration for Vantage InFusion controllers.
+Custom Home Assistant integration for Vantage InFusion controllers. It connects to the controller, creates lights, switches, covers, and thermostats, and puts each load in the Vantage area it belongs to.
 
-This project is a Python/Home Assistant port of the working controller behavior from
-`@smarterhomeapp/homebridge-vantage`. It is intended to live in its own repository.
+Report problems at [SmarterHomeApp/home-assistant-vantage/issues](https://github.com/SmarterHomeApp/home-assistant-vantage/issues).
 
-## Current Status
+## Install with HACS
 
-Early custom integration scaffold:
+[HACS](https://www.hacs.xyz/docs/use/) has to be installed in Home Assistant before these steps.
 
-- Fresh controller configuration download on startup
-- Controller scan of this machine's local network on ports 3001 and 3010
-- Persistent last-known-good controller cache
-- VID range and omit filtering
-- Basic entity mapping for lights, switches, covers, and thermostats
-- Realtime socket listener for Vantage status events
+1. Open Home Assistant.
+2. In the left sidebar, open **HACS**.
+3. Click the three-dot menu in the top right.
+4. Choose **Custom repositories**.
+5. In **Repository**, paste:
 
-## Installation For Development
+   ```text
+   https://github.com/SmarterHomeApp/home-assistant-vantage
+   ```
 
-Copy or symlink `custom_components/vantage` into your Home Assistant config directory:
+6. Set **Category** to **Integration**.
+7. Click **Add**. If Home Assistant says the repository already exists, close the dialog. It is already available.
+8. Search HACS for **Vantage InFusion**.
+9. Open it and click **Download**.
+10. Restart Home Assistant when HACS asks you to. You can also restart from **Settings → System → Restart**.
 
-```bash
-ln -s /path/to/home-assistant-vantage/custom_components/vantage /config/custom_components/vantage
-```
+## Add the controller
 
-Restart Home Assistant, then add the integration from:
+1. Go to **Settings → Devices & services**.
+2. Click **Add integration** in the bottom right.
+3. Search for **Vantage** and select **Vantage InFusion**.
+4. Fill in the form:
+   - **Controller IP address:** leave this blank to scan the local network shown on the form, or type the controller IP.
+   - **Local network:** filled in from this Home Assistant machine. It cannot be edited.
+   - **Username** and **Password:** leave blank unless the controller requires a login.
+   - **Use persistent last-known-good fallback cache:** leave this on. Home Assistant can start from the last successful download if the controller is briefly unreachable.
+   - **Comma-separated VIDs to omit:** optional. Use this to skip specific loads.
+   - **VID range (min-max):** leave the default `0-999999999` unless you want this entry to cover only part of the controller.
+   - **Force SSL ports:** leave this off. The integration uses the encrypted ports when the plain ports refuse the connection.
+5. Click **Submit**.
+
+Home Assistant then adds the loads. Each one keeps its own name, such as LAMP or CEILING, and is placed in its Vantage area, such as Jack's Office or Reception. Open **Settings → Areas** to see them.
+
+If submit fails with "Could not connect", check that Home Assistant can reach the controller on port 3001 or 3010, then try again with the controller IP filled in.
+
+## Install without HACS
+
+Copy the `custom_components/vantage` folder into your Home Assistant config directory, so the path is:
 
 ```text
-Settings -> Devices & services -> Add integration -> Vantage
+<config>/custom_components/vantage
 ```
 
-Enter the controller IP manually, or leave the host blank. A blank host scans the
-local network detected from this machine's address. That network is shown on the form
-and cannot be edited. If a later connection fails, the client rescans the current
-local network and updates the stored controller IP.
+On Home Assistant OS, the config directory is `/config`. Restart Home Assistant, then follow **Add the controller** above.
 
-## Notes
+## What it does
 
-This is not a direct TypeScript port. Home Assistant integrations run in Python and use
-entities/config entries instead of Homebridge platform accessories.
-
-The integration keeps a persistent full-controller cache keyed by controller IP. VID range
-filtering happens after the full controller configuration is loaded, so multiple config
-entries can divide one controller by VID range while using the same last-known-good cache.
+- Downloads the controller configuration on startup
+- Scans this machine's local network on ports 3001 and 3010 when the host is left blank
+- Keeps a last-known-good configuration cache
+- Filters loads by VID range and by an omit list
+- Creates lights, switches, covers, and thermostats
+- Reads the current level of each load before the entities are created
+- Listens for later status changes from the controller
+- Creates a Home Assistant area for each Vantage area and puts the load in it

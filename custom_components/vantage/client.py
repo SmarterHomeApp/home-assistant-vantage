@@ -590,16 +590,19 @@ class VantageClient:
                 continue
 
             name = str(item.get("DName") or item.get("Name") or f"VID{vid}")
-            area_id = item.get("Area")
-            if area_id in areas and areas[area_id].get("Name"):
-                name = f"{areas[area_id]['Name']} {name}"
+            area_ref = str(item.get("AreaID") or item.get("Area") or "")
+            area_record = areas.get(area_ref)
+            area_name = ""
+            if area_record:
+                area_name = str(area_record.get("Name") or area_record.get("DName") or "").strip()
             name = name.replace("-", "") or f"VID{vid}"
-            if name.lower() in seen_names:
+            name_key = f"{area_name.lower()}|{name.lower()}"
+            if name_key in seen_names:
                 name = f"{name} VID{vid}"
-            seen_names.add(name.lower())
+            seen_names.add(name_key)
 
             if item.get("DeviceCategory") == "HVAC" or object_type in TYPE_THERMO:
-                devices.append(VantageDevice(name, vid, vid, object_type, "thermostat"))
+                devices.append(VantageDevice(name, vid, vid, object_type, "thermostat", area=area_name or None))
                 continue
 
             if key == "Load" or object_type in {
@@ -624,14 +627,22 @@ class VantageClient:
                 }
                 device_type = "rgb" if object_type == "Vantage.DDGColorLoad" else "relay" if is_relay else "dimmer"
                 devices.append(
-                    VantageDevice(name, vid, vid, object_type, device_type, load_type=item.get("LoadType")),
+                    VantageDevice(
+                        name,
+                        vid,
+                        vid,
+                        object_type,
+                        device_type,
+                        area=area_name or None,
+                        load_type=item.get("LoadType"),
+                    ),
                 )
                 continue
 
             if object_type in TYPE_BLIND:
                 if object_type == "RelayBlind":
                     blind_open_close.update({str(item.get("OpenLoad", "")), str(item.get("CloseLoad", ""))})
-                devices.append(VantageDevice(name, vid, vid, object_type, "blind"))
+                devices.append(VantageDevice(name, vid, vid, object_type, "blind", area=area_name or None))
 
         return [device for device in devices if device.address not in blind_open_close]
 
