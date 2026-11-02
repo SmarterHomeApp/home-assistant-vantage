@@ -18,7 +18,9 @@ class VantageEntity(Entity):
     def __init__(self, data: VantageData, device: VantageDevice) -> None:
         self.data = data
         self.device = device
-        self._attr_name = device.name
+        # The device name is the Vantage display name. Leaving the entity name
+        # empty keeps Home Assistant from showing it a second time.
+        self._attr_name = None
         self._attr_unique_id = f"{data.entry.entry_id}_{device.vid}"
         self._remove_listener = None
 

@@ -589,13 +589,12 @@ class VantageClient:
             if object_type not in OBJECT_TYPES:
                 continue
 
-            name = str(item.get("DName") or item.get("Name") or f"VID{vid}")
+            name = str(item.get("DName") or item.get("Name") or "").strip() or f"VID{vid}"
             area_ref = str(item.get("AreaID") or item.get("Area") or "")
             area_record = areas.get(area_ref)
             area_name = ""
             if area_record:
                 area_name = str(area_record.get("Name") or area_record.get("DName") or "").strip()
-            name = name.replace("-", "") or f"VID{vid}"
             name_key = f"{area_name.lower()}|{name.lower()}"
             if name_key in seen_names:
                 name = f"{name} VID{vid}"
