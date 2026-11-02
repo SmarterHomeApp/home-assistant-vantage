@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Vantage InFusion",
+        "description": "Connect to a Vantage InFusion controller. Leave the host blank to scan the local network below.",
+        "data": {
+          "host": "Controller IP address",
+          "scan_subnet": "Local network",
+          "username": "Username",
+          "password": "Password",
+          "use_cache": "Use persistent last-known-good fallback cache",
+          "omit": "Comma-separated VIDs to omit",
+          "range": "VID range (min-max)",
+          "force_ssl": "Force SSL ports"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to or discover the Vantage controller.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This Vantage controller is already configured."
+    }
+  }
+}
